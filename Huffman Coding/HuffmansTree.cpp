@@ -1,12 +1,13 @@
 #include "HuffmansTree.h"
 
+#include <stack>
 #include <cmath>
 
-std::map<char,int> HuffmansTree::createFrequencyTable (const string& input) const
+std::map<char, int> HuffmansTree::createFrequencyTable(const string& input) const
 {
-    std::map<char,int> frequencyTable;
+    std::map<char, int> frequencyTable;
 
-    for (char symbol: input)
+    for (char symbol : input)
     {
         frequencyTable[symbol]++;
     }
@@ -14,62 +15,92 @@ std::map<char,int> HuffmansTree::createFrequencyTable (const string& input) cons
     return frequencyTable;
 }
 
-HuffmansTree::priorityQueue HuffmansTree::frequencyTableToQueue (std::map<char,int> frequencyTable) const
+HuffmansTree::priorityQueue HuffmansTree::frequencyTableToQueue(std::map<char,int> frequencyTable) const
 {
     priorityQueue frequencyQueue;
 
-    for (std::pair<char,int> elem: frequencyTable)
+    for (std::pair<char,int> elem : frequencyTable)
     {
         string symbol;
         symbol += elem.first;
 
-        Node* symbolNode = new Node (elem.second, nullptr, nullptr);
+        Node* symbolNode = new Node(elem.second, nullptr, nullptr);
         symbolNode->symbol.emplace(elem.first);
 
-        pairType toPush(symbolNode,symbol);
+        PairType toPush(symbolNode, symbol);
         frequencyQueue.push(toPush);
     }
 
     return frequencyQueue;
 }
 
-void HuffmansTree::createTree (HuffmansTree::priorityQueue frequencyQueue)
+void HuffmansTree::createTreeForCompress(HuffmansTree::priorityQueue frequencyQueue)
 {
-    pairType _left = frequencyQueue.top();
+    PairType _left = frequencyQueue.top();
     frequencyQueue.pop();
 
     if (frequencyQueue.empty())
     {
         root = _left.first;
         alphabet = _left.second;
-        
+
         return;
     }
 
-    pairType _right = frequencyQueue.top();
+    PairType _right = frequencyQueue.top();
     frequencyQueue.pop();
 
-    Node* currRoot = new Node (_left.first->data + _right.first->data, _left.first, _right.first);
+    Node* currRoot = new Node(_left.first->data + _right.first->data, _left.first, _right.first);
 
-    pairType toPush(currRoot, _left.second + _right.second);
+    PairType toPush(currRoot, _left.second + _right.second);
     frequencyQueue.push(toPush);
 
     // std::cout << toPush.second << ": " << _left.second << " " << _right.second << std::endl;
 
-    createTree(frequencyQueue);
+    createTreeForCompress(frequencyQueue);
 }
 
-std::map<char,string> HuffmansTree::createCodeTable () const
+void HuffmansTree::createTreeForDecompress (const std::vector<std::pair<int,std::optional<char>>>& nodesData)
+{
+    std::stack<Node*> nodes;
+
+    for (auto elem: nodesData)
+    {
+        Node* newNode;
+
+        if (elem.second.has_value())
+        {
+            newNode = new Node (elem.first, nullptr, nullptr);
+            newNode->symbol = elem.second;
+        }
+        else
+        {
+            Node* rightChild = nodes.top();
+            nodes.pop();
+
+            Node* leftChild = nodes.top();
+            nodes.pop();
+
+            newNode = new Node (elem.first, leftChild, rightChild);
+        }
+
+        nodes.push(newNode);
+    }
+
+    root = nodes.top();
+}
+
+std::map<char,string> HuffmansTree::createCodeTable() const
 {
     std::map<char,string> codeTable;
     int indexAlphabet = 0;
 
-    createCodeTableHelper (root,indexAlphabet,"",codeTable);
+    createCodeTableHelper(root, indexAlphabet, "", codeTable);
 
     return codeTable;
 }
 
-void HuffmansTree::createCodeTableHelper (Node* currRoot, int& indexAlphabet,
+void HuffmansTree::createCodeTableHelper(Node* currRoot, int& indexAlphabet,
                                          const string& path, std::map<char,string>& codeTable) const
 {
     if (!currRoot->left) // && !currRoot->right
@@ -84,27 +115,32 @@ void HuffmansTree::createCodeTableHelper (Node* currRoot, int& indexAlphabet,
     createCodeTableHelper(currRoot->right, indexAlphabet, path + "1", codeTable);
 }
 
-HuffmansTree::HuffmansTree (const string& input)
+HuffmansTree::HuffmansTree(const string& input)
 {
-    std::map<char,int> frequencyTable = createFrequencyTable(input);
+    std::map<char, int> frequencyTable = createFrequencyTable(input);
     priorityQueue frequencyQueue = frequencyTableToQueue(frequencyTable);
 
-    createTree(frequencyQueue);
-    std::cout << alphabet << std::endl;
+    createTreeForCompress(frequencyQueue);
+    // std::cout << alphabet << std::endl;
 }
 
-string HuffmansTree::getBinaryCode (const string& input) const
-{   
-    std::map<char,string> codeTable = createCodeTable();
+HuffmansTree::HuffmansTree (const std::vector<std::pair<int,std::optional<char>>>& nodesData)
+{
+    createTreeForDecompress(nodesData);
+}
+
+string HuffmansTree::getBinaryCode(const string& input) const
+{
+    std::map<char, string> codeTable = createCodeTable();
 
     // <------------- DELETE WHEN PRESENTING --------------->
-    for (std::pair<char,string> code: codeTable)
-    {
-        std::cout << code.first << " = " << code.second << std::endl;
-    }
+    // for (std::pair<char,string> code: codeTable)
+    // {
+    //     std::cout << code.first << " = " << code.second << std::endl;
+    // }
 
     string binaryCode;
-    for (char symbol: input)
+    for (char symbol : input)
     {
         binaryCode += codeTable[symbol];
     }
@@ -112,43 +148,43 @@ string HuffmansTree::getBinaryCode (const string& input) const
     return binaryCode;
 }
 
-int HuffmansTree::turnToDecimal (const string& binaryCode, const int& fromIndex, const int& highestPower) const
+int HuffmansTree::turnToDecimal(const string& binaryCode, const int& fromIndex, const int& highestPower) const
 {
     int decimal = 0,
         currPower = highestPower - 1;
 
     for (int i = fromIndex; i < fromIndex + highestPower; i++)
     {
-        decimal += std::pow(2,currPower) * (binaryCode[i] - '0');
+        decimal += std::pow(2, currPower) * (binaryCode[i] - '0');
         currPower--;
     }
 
     return decimal;
 }
 
-void HuffmansTree::compress (const string& input, std::ostream& out) const
+void HuffmansTree::compress(const string& input, std::ostream& out) const
 {
     out << getBinaryCode(input);
 }
 
-void HuffmansTree::debugCompress (const string& input) const
+void HuffmansTree::debugCompress(const string& input) const
 {
     string binaryCode = getBinaryCode(input);
-    
+
     int decimalCode = 0,
         currStartDecimal = 0,
         binarySize = binaryCode.size();
 
     while ((binarySize - currStartDecimal) / 8 > 0)
     {
-        std::cout << turnToDecimal(binaryCode,currStartDecimal,8) << " ";
+        std::cout << turnToDecimal(binaryCode, currStartDecimal, 8) << " ";
         currStartDecimal += 8;
     }
 
     std::cout << turnToDecimal(binaryCode, currStartDecimal, binarySize - currStartDecimal) << std::endl;
 }
 
-char HuffmansTree::decompressSymbol (const std::string& binaryCode, int& currIndex, Node* currRoot) const
+char HuffmansTree::decompressSymbol(const std::string& binaryCode, int& currIndex, Node* currRoot) const
 {
     if (currRoot->symbol.has_value()) // && !currRoot->right
     {
@@ -163,7 +199,7 @@ char HuffmansTree::decompressSymbol (const std::string& binaryCode, int& currInd
     return decompressSymbol(binaryCode, ++currIndex, currRoot->right);
 }
 
-void HuffmansTree::decompress (const std::string& binaryCode, std::ostream& out) const
+void HuffmansTree::decompress(const std::string& binaryCode, std::ostream& out) const
 {
     int currIndex = 0;
     string decompressed;
@@ -176,12 +212,31 @@ void HuffmansTree::decompress (const std::string& binaryCode, std::ostream& out)
     out << decompressed;
 }
 
-int HuffmansTree::getDegreeOfCompression (const string& input, const string& compressed) const
+void HuffmansTree::saveTreeHelper (std::ostream& out, Node* currRoot) const
 {
-    return round((double) compressed.size() / (8 * input.size()) * 100);
+    if (currRoot->symbol.has_value())
+    {
+        out << currRoot->data << "|" << currRoot->symbol.value() << " ";
+        return;
+    }
+
+    saveTreeHelper(out, currRoot->left);
+    saveTreeHelper(out, currRoot->right);
+
+    out << currRoot->data << " ";
 }
 
-void HuffmansTree::printDotHelper (std::ostream& out, Node* currRoot) const
+void HuffmansTree::saveTree (std::ostream& out) const
+{
+    saveTreeHelper(out, root);
+}
+
+int HuffmansTree::getDegreeOfCompression(const string& input, const string& compressed) const
+{
+    return round((double)compressed.size() / (8 * input.size()) * 100);
+}
+
+void HuffmansTree::printDotHelper(std::ostream& out, Node* currRoot) const
 {
     if (!currRoot)
     {
@@ -209,7 +264,7 @@ void HuffmansTree::printDotHelper (std::ostream& out, Node* currRoot) const
     printDotHelper(out, currRoot->right);
 }
 
-void HuffmansTree::printDot (std::ostream& out) const
+void HuffmansTree::printDot(std::ostream& out) const
 {
     out << "digraph G\n{";
     printDotHelper(out, root);
