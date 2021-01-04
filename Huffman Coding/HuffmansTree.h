@@ -45,7 +45,6 @@ class HuffmansTree
     };
     
     Node* root;
-    string alphabet;
     using priorityQueue = std::priority_queue<PairType, std::vector<PairType>, std::greater<PairType>>;
 
     std::map<char,int> createFrequencyTable (const string& input) const;
@@ -55,7 +54,7 @@ class HuffmansTree
     void createTreeForDecompress (const std::vector<std::pair<int,std::optional<char>>>& nodesData);
     
     std::map<char,string> createCodeTable () const;
-    void createCodeTableHelper (Node* currRoot, int& indexAlphabet, const string& path, std::map<char,string>& codeTable) const;
+    void createCodeTableHelper (Node* currRoot, const string& path, std::map<char,string>& codeTable) const;
     string getBinaryCode (const string& input) const;
     int turnToDecimal (const string& binaryCode, const int& fromIndex, const int& highestPower) const;
     char decompressSymbol (const std::string& binaryCode, int& currIndex, Node* currRoot) const;

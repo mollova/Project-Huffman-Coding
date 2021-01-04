@@ -42,7 +42,6 @@ void HuffmansTree::createTreeForCompress(HuffmansTree::priorityQueue frequencyQu
     if (frequencyQueue.empty())
     {
         root = _left.first;
-        alphabet = _left.second;
 
         return;
     }
@@ -50,7 +49,7 @@ void HuffmansTree::createTreeForCompress(HuffmansTree::priorityQueue frequencyQu
     PairType _right = frequencyQueue.top();
     frequencyQueue.pop();
 
-    Node* currRoot = new Node(_left.first->data + _right.first->data, _left.first, _right.first);
+    Node* currRoot = new Node (_left.first->data + _right.first->data, _left.first, _right.first);
 
     PairType toPush(currRoot, _left.second + _right.second);
     frequencyQueue.push(toPush);
@@ -93,26 +92,23 @@ void HuffmansTree::createTreeForDecompress (const std::vector<std::pair<int,std:
 std::map<char,string> HuffmansTree::createCodeTable() const
 {
     std::map<char,string> codeTable;
-    int indexAlphabet = 0;
-
-    createCodeTableHelper(root, indexAlphabet, "", codeTable);
+    createCodeTableHelper(root, "", codeTable);
 
     return codeTable;
 }
 
-void HuffmansTree::createCodeTableHelper(Node* currRoot, int& indexAlphabet,
-                                         const string& path, std::map<char,string>& codeTable) const
+void HuffmansTree::createCodeTableHelper (Node* currRoot, const string& path, 
+                                          std::map<char,string>& codeTable) const
 {
-    if (!currRoot->left) // && !currRoot->right
+    if (currRoot->symbol.has_value()) // && !currRoot->right
     {
-        codeTable[alphabet[indexAlphabet]] = path;
-        indexAlphabet++;
+        codeTable[currRoot->symbol.value()] = path;
 
         return;
     }
 
-    createCodeTableHelper(currRoot->left, indexAlphabet, path + "0", codeTable);
-    createCodeTableHelper(currRoot->right, indexAlphabet, path + "1", codeTable);
+    createCodeTableHelper(currRoot->left, path + "0", codeTable);
+    createCodeTableHelper(currRoot->right, path + "1", codeTable);
 }
 
 HuffmansTree::HuffmansTree(const string& input)
@@ -121,7 +117,6 @@ HuffmansTree::HuffmansTree(const string& input)
     priorityQueue frequencyQueue = frequencyTableToQueue(frequencyTable);
 
     createTreeForCompress(frequencyQueue);
-    // std::cout << alphabet << std::endl;
 }
 
 HuffmansTree::HuffmansTree (const std::vector<std::pair<int,std::optional<char>>>& nodesData)
