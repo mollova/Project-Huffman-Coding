@@ -1,90 +1,89 @@
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <vector>
-#include <optional>
 
-#include "HuffmansTree.h"
-// #include "HuffmanCoding.h"
+#include "Input.h"
+#include "Output.h"
+#include "HuffmanCoding.h"
 
-std::string readInput (std::ifstream& in)
+void runHuffmanCoding (const Modes& mode, const std::string& inputFile, 
+                       const std::string& treeFile, const std::string& outputFile)
 {
-    std::string input;
-    char c;
+    Input input;
+    Output output;
 
-    while (in.get(c))
+    if (mode == compress)
     {
-        input += c;
+        input.setCompressMode(inputFile);
+        output.setCompressMode(outputFile, treeFile);
+    }
+    else
+    {
+        input.setDecompressMode(inputFile, treeFile);
+        output.setDecompressMode(outputFile);
     }
 
-    return input;
+    HuffmanCoding coding(mode, input, output);
+    coding.runHuffmanCoding();
 }
 
-std::vector<std::pair<int,std::optional<char>>> readTree (std::ifstream& in)
+void runProgram ()
 {
-    std::vector<std::pair<int,std::optional<char>>> nodesData;
-    char c;
-    std::string data;
+    Modes mode; 
 
-    while (in.get(c))
+    std::string inputFile;
+    std::string treeFile;
+    std::string outputFile;
+
+    char command;
+    std::cin >> command;
+
+    bool readyToRunAlgorithm = false;
+
+    while (command != 'e')
     {
-        int number = 0;
-        while (c >= '0' && c <= '9')
+        if (command == 'c')
         {
-            number = number * 10 + (c - '0');
-            in.get(c);
+            mode = Modes::compress;
+        }
+        else if (command == 'd')
+        {
+            mode = Modes::decompress;
+        }
+        else if (command == 'i')
+        {
+            std::cin >> inputFile;
+
+            if (mode == decompress)
+            {
+                std::cin >> treeFile;
+            }
+        }
+        else if (command == 'o')
+        {
+            std::cin >> outputFile;
+
+            if (mode == compress)
+            {
+                std::cin >> treeFile;
+            }
         }
 
-        std::optional<char> symbol;
-        if (c == '|')
+        if (inputFile != "" && outputFile != "")
         {
-            in.get(c);
-            symbol.emplace(c);
-            in.ignore();
+            runHuffmanCoding(mode, inputFile, treeFile, outputFile);
+
+            inputFile = "";
+            treeFile = "";
+            outputFile = "";
         }
 
-        nodesData.push_back(std::make_pair(number, symbol));
-    }
-
-    return nodesData;
+        std::cin >> command;
+    } 
 }
 
 int main ()
 {
-    std::ifstream in ("input.txt");
-    std::string input = readInput(in);
+    runProgram();
 
-    HuffmansTree tree(input);
-
-    std::ofstream treeVisualize ("myTree.dot");
-    tree.printDot(treeVisualize);
-    treeVisualize.close();
-
-    std::ofstream out ("compressed.txt");
-    tree.compress(input,out);
-    out.close();
-
-    tree.debugCompress(input);
-
-    std::ifstream toDecompress ("compressed.txt");
-    string compressed;
-    toDecompress >> compressed;
-    toDecompress.close();
-
-    std::ofstream printDecompressed ("decompressed.txt");
-    // tree.decompress(compressed, printDecompressed);
-
-    std::cout << tree.getDegreeOfCompression(input,compressed) << "%\n";
-
-    std::ofstream savedTree ("savedTree.txt");
-    tree.saveTree(savedTree);
-    savedTree.close();
-
-    std::ifstream readSavedTree ("savedTree.txt");
-    std::vector<std::pair<int,std::optional<char>>> nodesData = readTree(readSavedTree);
-
-    HuffmansTree tree2(nodesData);
-    tree2.decompress(compressed, printDecompressed);
-
-    return 0;
+    return 0;   
 }
