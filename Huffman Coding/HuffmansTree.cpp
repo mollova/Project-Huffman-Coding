@@ -22,9 +22,10 @@ bool HuffmansTree::PairType::operator > (const PairType& b) const
     return this->first->data > b.first->data;
 }
 
-std::map<char, int> HuffmansTree::createFrequencyTable(const string& input) const
+// -compress- returns a map with key the symbol and value - it's frequency
+std::map<char,int> HuffmansTree::createFrequencyTable(const string& input) const
 {
-    std::map<char, int> frequencyTable;
+    std::map<char,int> frequencyTable;
 
     for (char symbol : input)
     {
@@ -34,6 +35,7 @@ std::map<char, int> HuffmansTree::createFrequencyTable(const string& input) cons
     return frequencyTable;
 }
 
+// -compress- and returns the frequency table into prioriry queue to easy access the nodes with the least frequency
 HuffmansTree::priorityQueue HuffmansTree::frequencyTableToQueue(std::map<char,int> frequencyTable) const
 {
     priorityQueue frequencyQueue;
@@ -53,6 +55,7 @@ HuffmansTree::priorityQueue HuffmansTree::frequencyTableToQueue(std::map<char,in
     return frequencyQueue;
 }
 
+// -compress- constructs the tree for mode compress from the priority queue frequency table
 void HuffmansTree::createTreeForCompress(HuffmansTree::priorityQueue frequencyQueue)
 {
     PairType _left = frequencyQueue.top();
@@ -76,6 +79,7 @@ void HuffmansTree::createTreeForCompress(HuffmansTree::priorityQueue frequencyQu
     createTreeForCompress(frequencyQueue);
 }
 
+// -decompress- constructs the tree for mode decompress from the read tree
 void HuffmansTree::createTreeForDecompress (const std::vector<std::pair<int,std::optional<char>>>& nodesData)
 {
     std::stack<Node*> nodes;
@@ -106,6 +110,7 @@ void HuffmansTree::createTreeForDecompress (const std::vector<std::pair<int,std:
     root = nodes.top();
 }
 
+// -compress- creates and returns a map with key a symbol from the text and value - it's compressed value
 std::map<char,string> HuffmansTree::createCodeTable() const
 {
     std::map<char,string> codeTable;
@@ -114,6 +119,7 @@ std::map<char,string> HuffmansTree::createCodeTable() const
     return codeTable;
 }
 
+// -compress-
 void HuffmansTree::createCodeTableHelper (Node* currRoot, const string& path, 
                                           std::map<char,string>& codeTable) const
 {
@@ -128,6 +134,7 @@ void HuffmansTree::createCodeTableHelper (Node* currRoot, const string& path,
     createCodeTableHelper(currRoot->right, path + "1", codeTable);
 }
 
+// -compress- constructs the tree
 void HuffmansTree::setCompressMode (const string& input)
 {
     std::map<char, int> frequencyTable = createFrequencyTable(input);
@@ -136,12 +143,20 @@ void HuffmansTree::setCompressMode (const string& input)
     createTreeForCompress(frequencyQueue);
 }
 
+// -debug compress- constructs the tree (same as in compress mode)
+void HuffmansTree::setDebugCompressMode (const string& input)
+{
+    setCompressMode(input);
+}
+
+// -decompress- constructs the tree
 void HuffmansTree::setDecompressMode (const std::vector<std::pair<int,std::optional<char>>>& nodesData)
 {
     createTreeForDecompress(nodesData);
-}
+}   
 
-string HuffmansTree::compress(const string& input) const
+// -compress- returns a string with the compressed text
+std::pair<string,int> HuffmansTree::compress(const string& input) const
 {
     std::map<char, string> codeTable = createCodeTable();
     string binaryCode;
@@ -151,9 +166,12 @@ string HuffmansTree::compress(const string& input) const
         binaryCode += codeTable[symbol];
     }
 
-    return binaryCode;
+    int degreeOfCompression = getDegreeOfCompression(input,binaryCode);
+
+    return std::make_pair(binaryCode,degreeOfCompression);
 }
 
+// -debug compress- turns 8 bits into an integer
 int HuffmansTree::turnToDecimal(const string& binaryCode, const int& fromIndex, const int& highestPower) const
 {
     int decimal = 0,
@@ -168,23 +186,35 @@ int HuffmansTree::turnToDecimal(const string& binaryCode, const int& fromIndex, 
     return decimal;
 }
 
-void HuffmansTree::debugCompress(const string& input) const
+// -debug compress- returns a vector of the integers computed from the compressed file
+std::pair<std::vector<int>,int> HuffmansTree::debugCompress(const string& input) const
 {
-    string binaryCode = compress(input);
+    std::pair<string,int> compressed = compress(input);
+    string binaryCode = compressed.first;
+    int degreeOfCompression = compressed.second;
 
-    int decimalCode = 0,
-        currStartDecimal = 0,
-        binarySize = binaryCode.size();
+    int currStartDecimal = 0,
+        binarySize = binaryCode.size(),
+        currentDecimal;
+    std::vector<int> decimalCode;
 
     while ((binarySize - currStartDecimal) / 8 > 0)
     {
-        std::cout << turnToDecimal(binaryCode, currStartDecimal, 8) << " ";
+        currentDecimal = turnToDecimal(binaryCode, currStartDecimal, 8);
+        decimalCode.push_back(currentDecimal);
         currStartDecimal += 8;
     }
 
-    std::cout << turnToDecimal(binaryCode, currStartDecimal, binarySize - currStartDecimal) << std::endl;
+    currentDecimal = turnToDecimal(binaryCode, currStartDecimal, binarySize - currStartDecimal);
+    if (currentDecimal != 0)
+    {
+        decimalCode.push_back(currentDecimal);
+    }
+
+    return std::make_pair(decimalCode,degreeOfCompression);
 }
 
+// -decompress- decompresses a single symbol
 char HuffmansTree::decompressSymbol(const std::string& binaryCode, int& currIndex, Node* currRoot) const
 {
     if (currRoot->symbol.has_value()) // && !currRoot->right
@@ -200,6 +230,7 @@ char HuffmansTree::decompressSymbol(const std::string& binaryCode, int& currInde
     return decompressSymbol(binaryCode, ++currIndex, currRoot->right);
 }
 
+// -decompress- returns a string with the decompressed text
 std::string HuffmansTree::decompress(const std::string& binaryCode) const
 {
     int currIndex = 0;
@@ -227,6 +258,7 @@ void HuffmansTree::saveTreeHelper (std::string& savedTree, Node* currRoot) const
     savedTree += std::to_string(currRoot->data) + " ";
 }
 
+// returns a string with the information of the nodes in postorder (left, right, root) traversal 
 std::string HuffmansTree::saveTree () const
 {
     std::string savedTree;
@@ -235,42 +267,50 @@ std::string HuffmansTree::saveTree () const
     return savedTree;
 }
 
+// -compress- returns the degree of compression of the text
 int HuffmansTree::getDegreeOfCompression(const string& input, const string& compressed) const
 {
     return round((double)compressed.size() / (8 * input.size()) * 100);
 }
 
-void HuffmansTree::printDotHelper(std::ostream& out, Node* currRoot) const
+void HuffmansTree::printDotHelper(string& dotInfo, Node* currRoot) const
 {
-    if (!currRoot)
+    if (currRoot->symbol.has_value())
     {
+        dotInfo += std::to_string((long)currRoot) + 
+                   "[label=\"" + std::to_string(currRoot->data) + "\"]" + 
+                   "[xlabel = \"" + currRoot->symbol.value() + "\"];\n";
+        
         return;
     }
 
-    printDotHelper(out, currRoot->left);
-
-    out << (long)currRoot << "[label=\"" << currRoot->data << "\"]";
-    if (currRoot->symbol.has_value())
-    {
-        out << "[xlabel = \"" << currRoot->symbol.value() << "\"]";
-    }
-    out << ";\n";
+    printDotHelper(dotInfo, currRoot->left);
+    
+    dotInfo += std::to_string((long)currRoot) + 
+               "[label=\"" + std::to_string(currRoot->data) + "\"];\n";
 
     if (currRoot->left)
     {
-        out << (long)currRoot << "->" << (long)(currRoot->left) << "[color=red][label = \"0\"]" << std::endl;
+        dotInfo += std::to_string((long)currRoot) + "->" + 
+                   std::to_string((long)(currRoot->left)) +
+                   "[color=red][label = \"0\"]\n";
     }
     if (currRoot->right)
     {
-        out << (long)currRoot << "->" << (long)(currRoot->right) << "[color=blue][label = \"1\"]" << std::endl;
+        dotInfo += std::to_string((long)currRoot) + "->" +
+                   std::to_string((long)(currRoot->right)) + 
+                   "[color=blue][label = \"1\"]\n";
     }
 
-    printDotHelper(out, currRoot->right);
+    printDotHelper(dotInfo, currRoot->right);
 }
 
-void HuffmansTree::printDot(std::ostream& out) const
+// visualizes the tree
+string HuffmansTree::printDot() const
 {
-    out << "digraph G\n{";
-    printDotHelper(out, root);
-    out << "}\n";
+    string dotInfo = "digraph G\n{";
+    printDotHelper(dotInfo, root);
+    dotInfo += "}\n";
+
+    return dotInfo;
 }

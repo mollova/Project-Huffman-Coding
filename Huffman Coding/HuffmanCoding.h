@@ -10,7 +10,7 @@
 
 using std::string;
 
-enum Modes {compress, decompress};
+enum Modes {compress, debugCompress, decompress};
 
 class HuffmanCoding
 {
@@ -25,7 +25,7 @@ class HuffmanCoding
 
     void createTree ();
     void compress () const;
-    void compressDebug () const;
+    void debugCompress () const;
     void decompress () const;
 
     public:

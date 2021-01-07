@@ -1,8 +1,9 @@
 The following commands are supported:
--c                          to work in mode compress
--d                          to work in mode decompress
--i <filename>               to say which is the input file which will be compressed
--i <filename> <filename>    to say which is the input file which will be decompressed and the file where its tree is saved
--o <filename>               to say which is the output file od the compression/decompression
--h                          printing help file with the supported commands
--e                          exit
+ c                          to work in mode compress
+ b                          to work in mode debug compress
+ d                          to work in mode decompress
+ i <filename>               to say which is the input file which will be compressed
+ i <filename> <filename>    to say which is the input file which will be decompressed and the file where its tree is saved
+ o <filename>               to say which is the output file od the compression/decompression
+ h                          printing help file with the supported commands
+ e                          exit

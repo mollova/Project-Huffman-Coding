@@ -43,19 +43,20 @@ class HuffmansTree
     void createCodeTableHelper (Node* currRoot, const string& path, std::map<char,string>& codeTable) const;
     int turnToDecimal (const string& binaryCode, const int& fromIndex, const int& highestPower) const;
     char decompressSymbol (const std::string& binaryCode, int& currIndex, Node* currRoot) const;
-    void printDotHelper (std::ostream& out, Node* currRoot) const;
+    void printDotHelper (string& dotInfo, Node* currRoot) const;
     void saveTreeHelper (std::string& savedTree, Node* currRoot) const;
 
     public:
     void setCompressMode (const string& input);
+    void setDebugCompressMode (const string& input);
     void setDecompressMode (const std::vector<std::pair<int,std::optional<char>>>& nodesData);
 
-    string compress (const string& input) const;
-    void debugCompress (const string& input) const;
+    std::pair<string,int> compress (const string& input) const;
+    std::pair<std::vector<int>,int> debugCompress (const string& input) const;
     std::string decompress (const std::string& binaryCode) const;
-    int getDegreeOfCompression (const string& input, const string& compressed)  const;
+    int getDegreeOfCompression (const string& input, const string& compressed) const;
 
-    void printDot (std::ostream& out) const;
+    std::string printDot () const;
     std::string saveTree () const;
 };
 

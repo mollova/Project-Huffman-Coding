@@ -13,6 +13,7 @@ class Input
 
     public:
     void setCompressMode (const std::string& _inputFile);
+    void setDebugCompressMode (const std::string& _inputFile);
     void setDecompressMode (const std::string& _inputFile, const std::string& _treeFile);
 
     std::string readInputFile () const;

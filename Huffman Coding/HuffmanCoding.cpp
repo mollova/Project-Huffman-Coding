@@ -1,5 +1,6 @@
 #include "HuffmanCoding.h"
 
+// creates the tree according to the mode
 void HuffmanCoding::createTree ()
 {
     toTransform = input.readInputFile();
@@ -8,6 +9,10 @@ void HuffmanCoding::createTree ()
     {
         tree.setCompressMode(toTransform);
     }
+    else if (mode == Modes::debugCompress)
+    {
+        tree.setDebugCompressMode(toTransform);
+    }
     else
     {   
         std::vector<std::pair<int,std::optional<char>>> nodesData = input.readTreeFile();
@@ -15,18 +20,29 @@ void HuffmanCoding::createTree ()
     }   
 }
 
+// calls compress function for compress mode, outputs the result and saves the tree
 void HuffmanCoding::compress () const
 {
-    std::string binary = tree.compress(toTransform);
-    output.outputResult(binary);
+    std::pair<std::string,int> compressed = tree.compress(toTransform);
+
+    output.outputResult(compressed.first);
+    output.printDegreeOfCompression(compressed.second);
+
     output.saveTree(tree.saveTree());
 }
 
-void HuffmanCoding::compressDebug () const
+// calls debug compress function for debug compress mode, outputs the result and saves the tree
+void HuffmanCoding::debugCompress () const
 {
+    std::pair<std::vector<int>,int> compressed = tree.debugCompress(toTransform);
 
+    output.outputDebugMode(compressed.first);
+    output.printDegreeOfCompression(compressed.second);
+
+    output.saveTree(tree.saveTree());
 }
 
+// calls decompress function for decompress mode and outputs the result
 void HuffmanCoding::decompress () const
 {
     std::string text = tree.decompress(toTransform);
@@ -42,18 +58,21 @@ HuffmanCoding::HuffmanCoding (const Modes& _mode, const Input& _input, const Out
     createTree();
 }
 
+// calls the appropriate function according to the mode and visualizes the tree
 void HuffmanCoding::runHuffmanCoding () const
 {
     if (mode == Modes::compress)
     {
         compress();
     }
+    else if (mode == Modes::debugCompress)
+    {
+        debugCompress();
+    }
     else
     {
         decompress();
     }
 
-    std::string printTreeFile = "myTree.dot";
-    std::ofstream printTree(printTreeFile);
-    tree.printDot(printTree);
+    output.visualizeTree(tree.printDot());
 }
