@@ -1,3 +1,7 @@
+/** \file HuffmanCoding.h 
+    \brief Runs Huffman coding
+*/
+
 #ifndef __HUFFMANCODING__HH
 #define __HUFFMANCODING__HH
 
@@ -9,19 +13,25 @@
 #include <string>
 
 using std::string;
+using std::vector;
+using std::pair;
+using std::optional;
 
+/// The possible modes of the program
 enum Modes {compress, debugCompress, decompress};
 
+/// Class containing the main components (information) needed for running the algorithm
+/// used to control the calling of the right functions for each mode
 class HuffmanCoding
 {
     private:
-    Modes mode;
+    Modes mode; ///< the mode in which the program is called
 
-    HuffmansTree tree;
-    Input input;
-    Output output;
+    HuffmansTree tree; ///< the tree for compressing/decompressing
+    Input input; ///< the input for that call of the programm 
+    Output output; ///< the input for that call of the progra
 
-    std::string toTransform;
+    string toTransform; ///< the text/binary code which will be compressed/decompressed
 
     void createTree ();
     void compress () const;

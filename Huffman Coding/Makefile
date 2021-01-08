@@ -1,11 +1,28 @@
-output: main.o PairType.o HufmansTree.o
-	g++ -std=c++14 main.o PairType.o HufmansTree.o -o output
+root= $(shell git rev-parse --show-toplevel)
 
-main.o: main.cpp PairType.h HufmansTree.h
-	g++ -c -std=c++14 main.cpp
+output: main.o HuffmanCoding.o HuffmansTree.o Input.o Output.o
+	g++ -std=c++17 main.o HuffmanCoding.o HuffmansTree.o Input.o Output.o -o output
 
-PairType.o: PairType.h PairType.cpp
-	g++ -c -std=c++14 PairType.cpp
+main.o: main.cpp HuffmanCoding.h Input.h Output.h
+	g++ -c -std=c++17 main.cpp
 
-HufmansTree.o: HufmansTree.h HufmansTree.cpp
-	g++ -c -std=c++14 HufmansTree.cpp
+HuffmanCoding.o: HuffmanCoding.h HuffmanCoding.cpp HuffmansTree.h Input.h Output.h
+	g++ -c -std=c++17 HuffmanCoding.cpp
+
+HuffmansTree.o: HuffmansTree.h HuffmansTree.cpp
+	g++ -c -std=c++17 HuffmansTree.cpp
+
+Input.o: Input.h Input.cpp
+	g++ -c -std=c++17 Input.cpp
+
+Output.o: Output.h Output.cpp
+	g++ -c -std=c++17 Output.cpp
+
+build_tests: tests.o HuffmanCoding.o
+	g++ tests.o HuffmanCoding.o -o tests.exe
+
+tests.o: tests.cpp
+	g++ -I $(root) -c tests.cpp
+
+run_tests:
+	./tests.exe 

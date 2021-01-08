@@ -5,25 +5,27 @@ void HuffmanCoding::createTree ()
 {
     toTransform = input.readInputFile();
 
-    if (mode == Modes::compress)
+    switch (mode)
     {
-        tree.setCompressMode(toTransform);
+        case Modes::compress:
+            tree.setCompressMode(toTransform);
+            break;
+
+        case Modes::debugCompress:
+            tree.setDebugCompressMode(toTransform);
+            break;
+        
+        case Modes::decompress:
+            vector<pair<int,optional<char>>> nodesData = input.readTreeFile();
+            tree.setDecompressMode(nodesData);
+            break;
     }
-    else if (mode == Modes::debugCompress)
-    {
-        tree.setDebugCompressMode(toTransform);
-    }
-    else
-    {   
-        std::vector<std::pair<int,std::optional<char>>> nodesData = input.readTreeFile();
-        tree.setDecompressMode(nodesData);
-    }   
 }
 
 // calls compress function for compress mode, outputs the result and saves the tree
 void HuffmanCoding::compress () const
 {
-    std::pair<std::string,int> compressed = tree.compress(toTransform);
+    pair<string,int> compressed = tree.compress(toTransform);
 
     output.outputResult(compressed.first);
     output.printDegreeOfCompression(compressed.second);
@@ -34,7 +36,7 @@ void HuffmanCoding::compress () const
 // calls debug compress function for debug compress mode, outputs the result and saves the tree
 void HuffmanCoding::debugCompress () const
 {
-    std::pair<std::vector<int>,int> compressed = tree.debugCompress(toTransform);
+    pair<vector<int>,int> compressed = tree.debugCompress(toTransform);
 
     output.outputDebugMode(compressed.first);
     output.printDegreeOfCompression(compressed.second);
@@ -45,8 +47,10 @@ void HuffmanCoding::debugCompress () const
 // calls decompress function for decompress mode and outputs the result
 void HuffmanCoding::decompress () const
 {
-    std::string text = tree.decompress(toTransform);
-    output.outputResult(text); 
+    string text = tree.decompress(toTransform);
+    
+    output.outputResult(text);
+    output.printAfterDecompress(); 
 }
 
 HuffmanCoding::HuffmanCoding (const Modes& _mode, const Input& _input, const Output& _output)
@@ -61,17 +65,19 @@ HuffmanCoding::HuffmanCoding (const Modes& _mode, const Input& _input, const Out
 // calls the appropriate function according to the mode and visualizes the tree
 void HuffmanCoding::runHuffmanCoding () const
 {
-    if (mode == Modes::compress)
+    switch (mode)
     {
-        compress();
-    }
-    else if (mode == Modes::debugCompress)
-    {
-        debugCompress();
-    }
-    else
-    {
-        decompress();
+        case Modes::compress:
+            compress();
+            break;
+
+        case Modes::debugCompress:
+            debugCompress();
+            break;
+        
+        case Modes::decompress:
+            decompress();
+            break;
     }
 
     output.visualizeTree(tree.printDot());

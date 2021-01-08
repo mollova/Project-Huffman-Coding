@@ -4,27 +4,27 @@
 #include <fstream>
 
 // in compress mode a text is being read from a file and a tree is not
-void Input::setCompressMode (const std::string& _inputFile)
+void Input::setCompressMode (const string& _inputFile)
 {
     inputFile = _inputFile;
     treeFile = "";
 }
 
 // in debug compress mode the input is the same as in compress mode
-void Input::setDebugCompressMode (const std::string& _inputFile)
+void Input::setDebugCompressMode (const string& _inputFile)
 {
     setCompressMode(_inputFile);
 }
 
 // in decompress mode a binary code and a tree are being read from a file
-void Input::setDecompressMode (const std::string& _inputFile, const std::string& _treeFile)
+void Input::setDecompressMode (const string& _inputFile, const string& _treeFile)
 {
     inputFile = _inputFile;
     treeFile = _treeFile;
 }
 
 // reads the text or the binary code which will be transformed
-std::string Input::readInputFile () const
+string Input::readInputFile () const
 {
     std::ifstream inputStream (inputFile);
 
@@ -33,7 +33,7 @@ std::string Input::readInputFile () const
         throw "Invalid input file.";
     }
 
-    std::string input;
+    string input;
     char c;
 
     while (inputStream.get(c))
@@ -41,11 +41,13 @@ std::string Input::readInputFile () const
         input += c;
     }
 
+    inputStream.close();
+
     return input;
 }
 
 // reads a tree saved in a file
-std::vector<std::pair<int,std::optional<char>>> Input::readTreeFile () const
+vector<pair<int,optional<char>>> Input::readTreeFile () const
 {
     std::ifstream treeStream (treeFile);
 
@@ -54,9 +56,8 @@ std::vector<std::pair<int,std::optional<char>>> Input::readTreeFile () const
         throw "Invalid tree file.";
     }
 
-    std::vector<std::pair<int,std::optional<char>>> nodesData;
+    vector<pair<int,optional<char>>> nodesData;
     char c;
-    std::string data;
 
     while (treeStream.get(c))
     {
@@ -67,7 +68,7 @@ std::vector<std::pair<int,std::optional<char>>> Input::readTreeFile () const
             treeStream.get(c);
         }
 
-        std::optional<char> symbol;
+        optional<char> symbol;
         if (c == '|')
         {
             treeStream.get(c);
@@ -77,6 +78,8 @@ std::vector<std::pair<int,std::optional<char>>> Input::readTreeFile () const
 
         nodesData.push_back(std::make_pair(number, symbol));
     }
+
+    treeStream.close();
 
     return nodesData;
 }
