@@ -52,7 +52,6 @@ std::vector<std::pair<int,std::optional<char>>> testsReadTree (const string tree
     return nodesData;
 }
 
-
 TEST_CASE ("Compress")
 {
     string input = "abracadabra";

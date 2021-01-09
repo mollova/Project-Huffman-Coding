@@ -120,7 +120,6 @@ bool commandMode (const char& command, Modes& mode)
     return false;
 }
 
-
 /// checks if the command is for input or output and if it is - read the names of the needed files
 bool commandIO (const char& command, const Modes& mode,
                 string& inputFile, string& treeFile, string& outputFile)
