@@ -17,12 +17,3 @@ Input.o: Input.h Input.cpp
 
 Output.o: Output.h Output.cpp
 	g++ -c -std=c++17 Output.cpp
-
-build_tests: tests.o HuffmanCoding.o
-	g++ tests.o HuffmanCoding.o -o tests.exe
-
-tests.o: tests.cpp
-	g++ -I $(root) -c tests.cpp
-
-run_tests:
-	./tests.exe 
