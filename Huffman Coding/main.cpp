@@ -85,6 +85,7 @@ void runHuffmanCoding (const Modes& mode, const string& inputFile,
     catch (const char* message)
     {
         std::cerr << message << std::endl;
+        std::cout << "Please enter new input and output files:\n";
     }
 }
 
