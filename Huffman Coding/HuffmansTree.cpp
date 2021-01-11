@@ -93,7 +93,7 @@ std::map<char,string> HuffmansTree::createCodeTable() const
 void HuffmansTree::createCodeTableHelper (Node* currRoot, const string& path, 
                                           std::map<char,string>& codeTable) const
 {
-    if (currRoot->symbol.has_value()) // && !currRoot->right
+    if (currRoot->symbol.has_value())
     {
         codeTable[currRoot->symbol.value()] = path;
 
@@ -133,7 +133,7 @@ char HuffmansTree::decompressSymbol(const string& binaryCode, int& currIndex, No
         throw std::invalid_argument("Last symbol not found, probably entered invalid tree file.");
     }
 
-    if (currRoot->symbol.has_value()) // && !currRoot->right
+    if (currRoot->symbol.has_value())
     {
         return currRoot->symbol.value();
     }
