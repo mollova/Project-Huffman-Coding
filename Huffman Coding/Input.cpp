@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <exception>
 
 // in compress mode a text is being read from a file and a tree is not
 void Input::setCompressMode (const string& _inputFile)
@@ -30,7 +31,7 @@ string Input::readInputFile () const
 
     if (!inputStream.good())
     {
-        throw "Invalid input file.";
+        throw std::invalid_argument("Invalid input file.");
     }
 
     string input;
@@ -53,7 +54,7 @@ vector<pair<int,optional<char>>> Input::readTreeFile () const
 
     if (!treeStream.good())
     {
-        throw "Invalid tree file.";
+        throw std::invalid_argument("Invalid tree file.");
     }
 
     vector<pair<int,optional<char>>> nodesData;

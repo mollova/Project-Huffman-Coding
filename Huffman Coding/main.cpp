@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <exception>
 
 #include "HuffmanCoding.h"
 
@@ -82,9 +83,9 @@ void runHuffmanCoding (const Modes& mode, const string& inputFile,
         HuffmanCoding coding(mode, input, output);
         coding.runHuffmanCoding();
     }
-    catch (const char* message)
+    catch (std::invalid_argument& e)
     {
-        std::cerr << message << std::endl;
+        std::cout << e.what() << std::endl;
         std::cout << "Please enter new input and output files:\n";
     }
 }

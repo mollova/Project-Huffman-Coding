@@ -2,6 +2,7 @@
 
 #include <stack>
 #include <cmath>
+#include <exception>
 
 HuffmansTree::Node::Node (const int& _data, Node* _left, Node* _right):
                           data {_data}, left {_left}, right {_right} {}
@@ -127,6 +128,11 @@ int HuffmansTree::turnToDecimal(const string& binaryCode, const int& fromIndex, 
 // -decompress- decompresses a single symbol
 char HuffmansTree::decompressSymbol(const string& binaryCode, int& currIndex, Node* currRoot) const
 {
+    if (currIndex == binaryCode.size() && !currRoot->symbol.has_value())
+    {
+        throw std::invalid_argument("Last symbol not found, probably entered invalid tree file.");
+    }
+
     if (currRoot->symbol.has_value()) // && !currRoot->right
     {
         return currRoot->symbol.value();

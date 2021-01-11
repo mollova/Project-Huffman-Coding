@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <exception>
 
 // in compress mode a binary code and a tree are being written in a file
 void Output::setCompressMode (const string& _outputFile, 
@@ -33,7 +34,7 @@ void Output::outputResult (const string& output) const
 
     if (!outputStream.good())
     {
-        throw "Invalid output file.";
+        throw std::invalid_argument("Invalid output file.");
     }
 
     outputStream << output;
